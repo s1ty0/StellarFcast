@@ -1,0 +1,11 @@
+torch
+torchvision
+torchaudio
+matplotlib
+scikit-learn
+seaborn
+umap-learn
+pyarrow
+einops # gpt4ts
+pandas
+statsmodels
