@@ -113,7 +113,7 @@ def collate_fn(data):
 
 # 定义数据集
 class FluxDataLoader(Dataset):
-    def __init__(self, root_path, flag=None, on_enhance=False, encoder="minLM", on_mm_statistics=False, on_mm_history=False, on_test_data_half=False, on_downSample=False): # todo
+    def __init__(self, root_path, flag=None, on_enhance=False, encoder="minLM", on_mm_statistics=False, on_mm_history=False, on_test_data_half=False, on_downSample=False): #
         self.flag = flag
         self.encoder = encoder
         self.on_mm_statistics = on_mm_statistics # 是否开启多模态
@@ -123,7 +123,7 @@ class FluxDataLoader(Dataset):
         self.on_downSample = on_downSample
 
         # === 文本编码器路径映射（可扩展）===
-        ENCODER_PATH_MAP = { # todo 等待迁移
+        ENCODER_PATH_MAP = { #
             "minLM": "./textEncoder/all-MiniLM-L6-v2",
             "bert-chinese": "./textEncoder/bert-base-chinese",
             # 未来可加： "bge": "./textEncoder/bge-small-en-v1.5", ...
@@ -154,7 +154,7 @@ class FluxDataLoader(Dataset):
         lc_data = np.load(f"{data_dir}/lc_data.npy")      # (N, 512)
         label_data = np.load(f"{data_dir}/label_data.npy")  # (N,)
 
-        # ✅ TODO 若开启，则执行小样本
+        # ✅ debug 若开启，则执行小样本
         # lc_data = lc_data[0:10]
         # label_data = label_data[0:10]
 
@@ -218,7 +218,7 @@ class FluxDataLoader(Dataset):
     def __len__(self):
         return len(self.X)
 
-    def __getitem__(self, idx): # TODO 等待更新
+    def __getitem__(self, idx): #
         x_raw = self.X[idx]  # (1，512)
         y = self.y[idx]
         y = int(y)
@@ -308,7 +308,7 @@ class CustomDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
-            # persistent_workers=True, #避免重复创建子进程的开销 TODO
+            # persistent_workers=True, #避免重复创建子进程的开销
             pin_memory=True,
             collate_fn=collate_fn
         )
@@ -319,7 +319,7 @@ class CustomDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时） TODO
+            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时）
             pin_memory=True,
             collate_fn=collate_fn
         )
@@ -330,17 +330,17 @@ class CustomDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时） TODO
+            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时）
             pin_memory=True,
             collate_fn=collate_fn
         )
 
 # 定义模型
 class MyTransformerModel(nn.Module):
-    def __init__(self, num_classes=2, input_dim=1, model_type="bert", use_lora=False, text_emb_dim=768, use_multimodal=False): # TODO input_dim
+    def __init__(self, num_classes=2, input_dim=1, model_type="bert", use_lora=False, text_emb_dim=768, use_multimodal=False): #  input_dim
         super().__init__()
         self.model_type = model_type.lower()
-        assert self.model_type in ["bert", "gpt2", "roberta"], "model_type is not included." # TODO
+        assert self.model_type in ["bert", "gpt2", "roberta"], "model_type is not included." #
 
         # 获取是否开启多模态
         self.use_multimodal = use_multimodal
@@ -366,7 +366,7 @@ class MyTransformerModel(nn.Module):
         # 输入投影层和分类头
         self.input_proj = nn.Linear(input_dim, self.config.hidden_size)
         self.classifier = nn.Sequential(
-            nn.Linear(self.config.hidden_size, 256), # todo 此处的256是一个可以调整的超参数
+            nn.Linear(self.config.hidden_size, 256), # 后续可以调整： 此处的256是一个可以调整的超参数
             nn.ReLU(),
             nn.Linear(256, num_classes)
         )
@@ -390,7 +390,7 @@ class MyTransformerModel(nn.Module):
                 # [choice1]
                 # target_modules = ["attn.c_attn"],  # 等价于BERT中的query、key和value
                 # [choice2]
-                # target_modules=["c_attn"],# todo
+                # target_modules=["c_attn"],#
                 # [choice3]
                 # target_modules=[
                 #     "attn.c_attn",
@@ -829,7 +829,7 @@ def main(args):
         logger=logger,
         log_every_n_steps=50,
         enable_progress_bar=True,
-        # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败 TODO
+        # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败
     )
 
     # 区分训练和 评估模式。训练模式：
@@ -896,7 +896,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size per GPU')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs (早停可能提前终止)') # 训练轮次设置为100，但经常epoch=10时早停
-    parser.add_argument('--num_workers', type=int, default=4, help='Number of data loading workers') # 暂时修改为0 否则改为4 todo dubug
+    parser.add_argument('--num_workers', type=int, default=4, help='Number of data loading workers') # 暂时修改为0 否则改为4
 
     # 以下是自定义参数，方便对程序进行改进和调试
     # 添加实验次数，用于保存相关模型 exp_num

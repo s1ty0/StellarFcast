@@ -22,7 +22,7 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.pred_len = configs.pred_len
 
-        #  TODO 1.引入轻量级可学习文本编码模块
+        #   1.引入轻量级可学习文本编码模块
         # === Multimodal Fusion: Text Embedding Compressor ===
         # on_multimodal 需要： 文本嵌入模型维度
         text_emb_dim = configs.text_emb_dim

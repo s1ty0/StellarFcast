@@ -242,7 +242,7 @@ def main():
     print("早停初始化完成，进入训练循环...")
 
     best_f1 = -1
-    for epoch in range(200): # TODO
+    for epoch in range(200): #
         print(f"开始Epoch {epoch + 1} 训练...")  # 新增
         model.train()
         total_loss = 0

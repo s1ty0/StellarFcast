@@ -19,7 +19,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.label_len = configs.label_len
 
-        #  TODO 1.引入轻量级可学习文本编码模块
+        #  1.引入轻量级可学习文本编码模块
         # === Multimodal Fusion: Text Embedding Compressor ===
         # on_multimodal 需要： 文本嵌入模型维度
         text_emb_dim = configs.text_emb_dim
@@ -140,7 +140,7 @@ class Model(nn.Module):
         # Output
         output = self.act(enc_out)  # the output transformer encoder/decoder embeddings don't include non-linearity
         output = self.dropout(output)
-        if x_mark_enc is not None: # TODO 5
+        if x_mark_enc is not None: #  5
             output = output * x_mark_enc.unsqueeze(-1)  # zero-out padding embeddings
         output = output.reshape(output.shape[0], -1)  # (batch_size, seq_length * d_model)
         output = self.projection(output)  # (batch_size, num_classes)

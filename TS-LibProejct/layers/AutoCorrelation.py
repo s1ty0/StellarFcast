@@ -24,7 +24,7 @@ class AutoCorrelation(nn.Module):
         self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def time_delay_agg_training(self, values, corr): # TODO, 可以分析下探究属于Autoformer的创新点.
+    def time_delay_agg_training(self, values, corr): #
         """
         SpeedUp version of Autocorrelation (a batch-normalization style design)
         This is for the training phase.
@@ -107,7 +107,7 @@ class AutoCorrelation(nn.Module):
             values = torch.cat([values, zeros], dim=1)
             keys = torch.cat([keys, zeros], dim=1)
         else:
-            values = values[:, :L, :, :] # TODO，这一步操作的机理需要探究下
+            values = values[:, :L, :, :] # 这一步操作的机理需要探究下
             keys = keys[:, :L, :, :]
 
         # period-based dependencies
@@ -137,7 +137,7 @@ class AutoCorrelationLayer(nn.Module):
         d_values = d_values or (d_model // n_heads)
 
         self.inner_correlation = correlation
-        self.query_projection = nn.Linear(d_model, d_keys * n_heads) # TODO,注意，此处前后shape一致,经历了线形层，有可训练参数
+        self.query_projection = nn.Linear(d_model, d_keys * n_heads) # 此处前后shape一致,经历了线形层，有可训练参数
         self.key_projection = nn.Linear(d_model, d_keys * n_heads)
         self.value_projection = nn.Linear(d_model, d_values * n_heads)
         self.out_projection = nn.Linear(d_values * n_heads, d_model)

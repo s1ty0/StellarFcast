@@ -16,7 +16,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
 
         self.d_inner = configs.d_model * configs.expand
-        self.dt_rank = math.ceil(configs.d_model / 16) # TODO implement "auto"
+        self.dt_rank = math.ceil(configs.d_model / 16) #  implement "auto"
         
         self.embedding = DataEmbedding(configs.enc_in, configs.d_model, configs.embed, configs.freq, configs.dropout)
 

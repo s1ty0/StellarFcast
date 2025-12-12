@@ -32,8 +32,8 @@ class Exp_Classification(Exp_Basic):
         return x_enc, text_emb, his_emb, label.to(self.device), raw_lc
 
     def _build_model(self):
-        self.args.seq_len = 512 # todo, 这里的值需要不断更改来调参
-        self.args.pred_len = 0 # todo 这里是0感觉不对，调试一下 ,分类任务中用不到，正确
+        self.args.seq_len = 512 # 这里的值需要不断更改来调参
+        self.args.pred_len = 0 # 这里是0感觉不对，调试一下 ,分类任务中用不到，正确
         self.args.num_class = 2
 
         # 3. 加载模型
@@ -52,7 +52,7 @@ class Exp_Classification(Exp_Basic):
         return model_optim
 
     def _select_criterion(self):
-        criterion = nn.CrossEntropyLoss() # TODO 这里需要更改
+        criterion = nn.CrossEntropyLoss() #
         if self.args.on_phy_loss:
             criterion = PhysicsRegularizedLoss()
         return criterion
@@ -165,7 +165,7 @@ class Exp_Classification(Exp_Basic):
         trues_np = trues.flatten().cpu().numpy()  # (N,)
 
         # ✅ 计算正类 F2-score（β=2）—— 用于早停！
-        predictions = (probs >= 0.5).astype(int)  # 默认阈值 0.5 # TODO
+        predictions = (probs >= 0.5).astype(int)  # 默认阈值 0.5 #
         val_f1 = f1_score(trues_np, predictions, pos_label=1, average='binary')
         val_f2 = fbeta_score(trues_np, predictions, beta=2.0, pos_label=1, average='binary', zero_division=0)
 

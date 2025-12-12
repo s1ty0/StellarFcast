@@ -48,7 +48,7 @@ class FluxDataLoader(Dataset):
         lc_data = np.load(f"{data_dir}/lc_data.npy")      # (N, 512)
         label_data = np.load(f"{data_dir}/label_data.npy")  # (N,)
 
-        # 本地代码一律执行小样本，模式，TODO
+        # 本地代码一律执行小样本，模式，
         # lc_data = lc_data[0:30]
         # label_data = label_data[0:30]
 

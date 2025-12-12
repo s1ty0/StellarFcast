@@ -31,7 +31,7 @@ class TokenEmbedding(nn.Module):
         super(TokenEmbedding, self).__init__()
         padding = 1 if torch.__version__ >= '1.5.0' else 2
         self.tokenConv = nn.Conv1d(in_channels=c_in, out_channels=d_model, # out_channels: 512, c_in: 8
-                                   kernel_size=3, padding=padding, padding_mode='circular', bias=False) # 此处,k s p = 3, 1, 1对形状有什么影响? TODO
+                                   kernel_size=3, padding=padding, padding_mode='circular', bias=False) # 此处,k s p = 3, 1, 1对形状有什么影响?
         for m in self.modules():
             if isinstance(m, nn.Conv1d):
                 nn.init.kaiming_normal_(
@@ -149,7 +149,7 @@ class DataEmbedding_wo_pos(nn.Module):
 
         self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
         self.position_embedding = PositionalEmbedding(d_model=d_model)
-        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type, # TODO 忽略掉了, 需要分析下
+        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type, # 忽略掉了, 需要分析下
                                                     freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(
             d_model=d_model, embed_type=embed_type, freq=freq)
         self.dropout = nn.Dropout(p=dropout)
@@ -158,7 +158,7 @@ class DataEmbedding_wo_pos(nn.Module):
         if x_mark is None:
             x = self.value_embedding(x)
         else:
-            x = self.value_embedding(x) + self.temporal_embedding(x_mark) # TODO 提到了时序嵌入
+            x = self.value_embedding(x) + self.temporal_embedding(x_mark) #  提到了时序嵌入
         return self.dropout(x)
 
 

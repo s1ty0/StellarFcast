@@ -11,10 +11,10 @@ if __name__ == '__main__':
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
 
-    parser = argparse.ArgumentParser(description='Our stellar model')  # TODO UPDATE
+    parser = argparse.ArgumentParser(description='Our stellar model')  #  UPDATE
 
     # basic config
-    parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast', # TODO 长期预测和短期预测的区别是？
+    parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast', #  长期预测和短期预测的区别是？
                         help='task name, options:[long_term_forecast, short_term_forecast, imputation, classification, anomaly_detection]')
     parser.add_argument('--is_training', type=int, required=True, default=1, help='status')
     parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
@@ -23,12 +23,12 @@ if __name__ == '__main__':
 
     # tessDataset loader
     parser.add_argument('--data', type=str, required=True, default='ETTh1', help='dataset type')
-    parser.add_argument('--root_path', type=str, default='./myDataK', help='root path of the tessDataset file') # todo
+    parser.add_argument('--root_path', type=str, default='./myDataK', help='root path of the tessDataset file') #
     parser.add_argument('--data_path', type=str, default='our.npy', help='tessDataset file')
-    parser.add_argument('--features', type=str, default='M', # TODO 体现在图像上是如何解释
+    parser.add_argument('--features', type=str, default='M', #  体现在图像上是如何解释
                         help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
-    parser.add_argument('--freq', type=str, default='h', # TODO 时间特征编码 ？
+    parser.add_argument('--freq', type=str, default='h', #  时间特征编码 ？
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
 
@@ -80,9 +80,9 @@ if __name__ == '__main__':
                         help='the length of segmen-wise iteration of SegRNN')
 
     # optimization
-    parser.add_argument('--num_workers', type=int, default=0, help='tessDataset loader num workers') # 本地默认是0，TODO 云服务器要改， 我先修改cheng0,（试试），我怀疑是这里导致dataloader加载不了，从10改成1. 果然 TODO
+    parser.add_argument('--num_workers', type=int, default=4, help='tessDataset loader num workers') # 本地默认是0， 云服务器要改， 我先修改cheng0,（试试），我怀疑是这里导致dataloader加载不了，从10改成1. 果然
     parser.add_argument('--itr', type=int, default=1, help='experiments times')
-    parser.add_argument('--train_epochs', type=int, default=2, help='train epochs') # todo
+    parser.add_argument('--train_epochs', type=int, default=100, help='train epochs') #
     parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input tessDataset')
     parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
     parser.add_argument('--learning_rate', type=float, default=0.01, help='optimizer learning rate') # 已按照FLARE文章修改
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
 
     # GPU
-    parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu') # TODO 服务器训练需更改成 True
+    parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu') #  服务器训练需更改成 True
     parser.add_argument('--gpu', type=int, default=0, help='gpu')
     parser.add_argument('--gpu_type', type=str, default='cuda', help='gpu type')  # cuda or mps
     parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)

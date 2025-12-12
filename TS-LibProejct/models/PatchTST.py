@@ -72,7 +72,7 @@ class Model(nn.Module):
             norm_layer=nn.Sequential(Transpose(1, 2), nn.BatchNorm1d(configs.d_model), Transpose(1, 2))
         )
 
-        #  TODO 1.引入轻量级可学习文本编码模块
+        #   1.引入轻量级可学习文本编码模块
         # === Multimodal Fusion: Text Embedding Compressor ===
         self.text_proj = nn.Linear(text_emb_dim, self.seq_len)
         self.text_act = nn.ReLU()  # optional non-linearity
@@ -92,7 +92,7 @@ class Model(nn.Module):
             self.projection = nn.Linear(
                 self.head_nf * configs.enc_in, configs.num_class)
 
-    # TODO 3. 写入形参
+    #  3. 写入形参
     def classification(self, x_enc, x_mark_enc, text_emb=None, his_emb=None):
         # Normalization from Non-stationary Transformer
         means = x_enc.mean(1, keepdim=True).detach()
@@ -101,7 +101,7 @@ class Model(nn.Module):
             torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
         x_enc /= stdev
 
-        # TODO 2. text_emb
+        #  2. text_emb
         # === 2. Optional: Inject compressed text as additional channels ===
         if text_emb is not None:
             # Compress text: [B, 384] -> [B, L]

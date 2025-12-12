@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class PhysicsRegularizedLoss(nn.Module):
-    def __init__(self, lambda_phys=0.1, rise_threshold=0.017093, conf_threshold = 0.5): # todo, 这里的rise_threshold值，有两个选择，分别是[kepler: 0.017093 和 tess： 0.013866]
+    def __init__(self, lambda_phys=0.1, rise_threshold=0.017093, conf_threshold = 0.5): # todo 这里的rise_threshold值，有两个选择，分别是[kepler: 0.017093 和 tess： 0.013866]
         super().__init__()
         self.ce_loss = nn.CrossEntropyLoss()
         self.lambda_phys = lambda_phys
@@ -48,7 +48,7 @@ class PhysicsRegularizedLoss(nn.Module):
         # 若预测是耀斑但无显著上升，则惩罚
         penalty = torch.relu(self.rise_threshold - max_rise)
 
-        # 加权: 只惩罚高置信度预测（pred_prob > 0.5）# pred_prob 参数可调 TODO
+        # 加权: 只惩罚高置信度预测（pred_prob > 0.5）# pred_prob 参数可调
         weight = torch.clamp(pred_probs - self.conf_threshold, min=0.0)
 
         return ((penalty * weight).mean() * weight).mean()

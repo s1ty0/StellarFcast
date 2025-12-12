@@ -48,7 +48,7 @@ class PhysicsRegularizedLoss(nn.Module): # kepler 0.017093 ✅  tess: 0.013866
         # 若预测是耀斑但无显著上升，则惩罚
         penalty = torch.relu(self.rise_threshold - max_rise)
 
-        # 加权: 只惩罚高置信度预测（pred_prob > 0.5）# pred_prob 参数可调 TODO
+        # 加权: 只惩罚高置信度预测（pred_prob > 0.5）# pred_prob 参数可调
         weight = torch.clamp(pred_probs - self.conf_threshold, min=0.0)
 
         return ((penalty * weight).mean() * weight).mean()

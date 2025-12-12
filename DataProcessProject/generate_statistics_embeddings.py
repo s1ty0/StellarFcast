@@ -88,7 +88,7 @@ def main():
     # 加载光变曲线
     print(f"Loading {lc_path}...")
     lc_data = np.load(lc_path)  # (N, 512)
-    # lc_data = lc_data[:10] # todo
+    # lc_data = lc_data[:10] # debug
 
 
     # 预计算统计量
@@ -129,8 +129,8 @@ def main():
             truncation=True,
             max_length=args.max_length
         )
-        # 移到 GPU（可选） TODO
-        # inputs = {k: v.cuda() for k, v in inputs.items()}
+        # 移到 GPU（可选） debug
+        inputs = {k: v.cuda() for k, v in inputs.items()}
         with torch.no_grad():
             outputs = model(**inputs)
         embeddings = outputs.last_hidden_state[:, 0, :].cpu().numpy()  # (B, 768)

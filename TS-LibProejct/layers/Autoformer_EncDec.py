@@ -18,12 +18,12 @@ class my_Layernorm(nn.Module):
         return x_hat - bias
 
 
-class moving_avg(nn.Module): # TODO, 移动平均. Flare原文中用到的，直接拿来用，有无更具创新力的方法，比如: 分配注意力的移动平均.查找文献
+class moving_avg(nn.Module): # 移动平均. Flare原文中用到的，直接拿来用，有无更具创新力的方法，比如: 分配注意力的移动平均.查找文献
     """
     Moving average block to highlight the trend of time series
     """
 
-    def __init__(self, kernel_size, stride): # TODO, 1. 此处是 kernel_size个数据点做移动平均, 需要分析下Flare文章中,用的是多少个数据点（公式中有）2.此处所作的移动平均，为确保输入输出一致，在开头和结尾扩展了各12行（(self.kernel_size - 1) // 2）数据，论文中有没有提到？（依旧看公式）实验中两种选择： 扩展-保持前后形状一致, 不扩展-？
+    def __init__(self, kernel_size, stride): # 1. 此处是 kernel_size个数据点做移动平均, 需要分析下Flare文章中,用的是多少个数据点（公式中有）2.此处所作的移动平均，为确保输入输出一致，在开头和结尾扩展了各12行（(self.kernel_size - 1) // 2）数据，论文中有没有提到？（依旧看公式）实验中两种选择： 扩展-保持前后形状一致, 不扩展-？
         super(moving_avg, self).__init__()
         self.kernel_size = kernel_size
         self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=stride, padding=0)
@@ -38,7 +38,7 @@ class moving_avg(nn.Module): # TODO, 移动平均. Flare原文中用到的，直
         return x
 
 
-class series_decomp(nn.Module): # TODO,该模块,Flare中也用到，此段代码可以完整的copy
+class series_decomp(nn.Module): # 模块,Flare中也用到，此段代码可以完整的copy
     """
     Series decomposition block
     """
@@ -132,7 +132,7 @@ class Encoder(nn.Module):
                 attns.append(attn)
 
         if self.norm is not None:
-            x = self.norm(x) # TODO 正则化操作
+            x = self.norm(x) # 正则化操作
 
         return x, attns
 
