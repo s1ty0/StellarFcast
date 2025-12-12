@@ -3,11 +3,13 @@
 同样的，需要安装以下依赖：
 
 ```
-torch>=2.0.0
-numpy>=1.21.0
-pandas>=1.3.0
-scikit-learn>=1.0.0
-pyarrow>=8.0.0
+pandas
+scikit-learn
+pyarrow
+numpy
+torch
+transformers
+tqdm
 ```
 
 但是，我不推荐你再次新建一个虚拟环境，在绝大数基础的python环境（base）里，应该都满足上述条件。
@@ -57,7 +59,21 @@ sh ./data_pipeline_tess.sh
 ./myDataK # 存放得到的Kepler数据
 ./myDataT # 存放得到的TESS数据
 ```
-
-随后将这俩文件夹分别复制、粘贴到`LLMProject文件夹`和`TS-LibProject文件夹`下。
 这样，我们就完成了基础的数据准备工作。
 
+等等！先别急，我们进行实验所必需的，一些改进点的引入，仍需要构建history和statistics的嵌入
+
+首先下载实验所使用的文本编码器：`bert`,
+
+```
+python encoderDown.py
+```
+
+然后，执行如下脚本，得到history和statistics的嵌入：
+
+```
+sh ./data_pipeline_kepler.sh
+sh ./data_pipeline_tess.sh
+```
+
+随后将这俩文件夹分别复制、粘贴到`LLMProject文件夹`和`TS-LibProject文件夹`下。就宣告数据处理章节的结束。

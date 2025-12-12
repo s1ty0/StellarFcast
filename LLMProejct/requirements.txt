@@ -9,3 +9,9 @@ pyarrow
 einops # gpt4ts
 pandas
 statsmodels
+pytorch
+transformers
+peft
+numpy
+tensorboard
+sentence-transformers
