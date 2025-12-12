@@ -47,8 +47,8 @@ roberta-base # https://huggingface.co/FacebookAI/roberta-base
 │       ├── tf_model.h5
 │       ├── tokenizer.json
 │       └── vocab.json
-├── myDataK # 提前构建好的数据集存放目录
-├── myDataT # 提前构建好的数据集存放目录
+├── myDataK # 提前构建好的数据集存放目录 （kepelr）
+├── myDataT # 提前构建好的数据集存放目录 （tess）
 ```
 
 
@@ -107,3 +107,27 @@ CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 -
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 ```
 
+
+复现`momoent`，需要执行如下指令，来安装复现`moment`需要的依赖：
+
+```
+pip install git+https://github.com/moment-timeseries-foundation-model/moment.git
+```
+
+然后执行：
+
+```
+main_moment.py TODO
+```
+
+
+
+复现gpt4ts
+
+```
+main_gpt4ts.py TODO
+```
+
+
+
+如此绝大部分实验你都可以成功复现。

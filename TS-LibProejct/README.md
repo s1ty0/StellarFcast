@@ -6,11 +6,20 @@
 pip install -r requirements.txt
 ```
 
-
+我不得不提醒你的是，如果在安装依赖的时候碰到了一些意外的错误，我推荐你询问大模型寻求帮助，实验所需的所有包已经列出，应该不会出现意外的错误。
 
 
 
 # 复现
+
+确保当下目录存在以下文件夹：
+
+```
+├── myDataK # 提前构建好的数据集存放目录（kepler）
+├── myDataT # 提前构建好的数据集存放目录（tess）
+```
+
+
 
 对应的复现指令（注：脚本后面携带的数字，代表指定的`cuda gpu`序号）：
 
@@ -36,5 +45,13 @@ sh ./scripts/classification/iTransformer.sh 1 --on_phy_loss --on_enhance --on_mm
 sh ./scripts/classification/MICN.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 ```
 
+注：以上的复现针对Kepler数据而言，如果想复现对应的TESS数据，只需要找到对应的脚本，按如下修改即可。
 
+```
+比如：
+# Autoformer.sh中：
+  --root_path ./myDataK \
+改为：
+  --root_path ./myDataT \
+```
 

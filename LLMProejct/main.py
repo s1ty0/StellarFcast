@@ -296,7 +296,7 @@ class CustomDataModule(LightningDataModule):
     def setup(self, stage=None):
         if stage == "test":
             self.test_dataset = FluxDataLoader(self.root_path, flag='TEST', encoder=self.encoder,
-                                               on_mm_statistics=self.on_mm_statistics, on_enhance=self.on_enhance, on_test_data_half=self.on_test_data_half)
+                                               on_mm_statistics=self.on_mm_statistics,on_mm_history=self.on_mm_history, on_enhance=self.on_enhance, on_test_data_half=self.on_test_data_half)
         else:
             self.train_dataset = FluxDataLoader(self.root_path, flag='TRAIN', encoder=self.encoder, on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance, on_downSample=self.on_downSample)
             self.val_dataset = FluxDataLoader(self.root_path, flag='VAL', encoder=self.encoder, on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance)
