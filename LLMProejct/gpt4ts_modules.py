@@ -158,7 +158,7 @@ class gpt4ts(nn.Module):
         self.patch_size = 16
         self.stride = 2
         self.gpt_layers = 6
-        self.feat_dim = input_dim  # todo
+        self.feat_dim = input_dim  #
         self.num_classes = 2
         self.d_model = 768
 
@@ -197,7 +197,7 @@ class gpt4ts(nn.Module):
         B, M, L = input.shape
 
 
-        input_x = self.padding_patch_layer(input)  # todo
+        input_x = self.padding_patch_layer(input)  #
         input_x = input_x.unfold(dimension=-1, size=self.patch_size, step=self.stride).contiguous()
         input_x = rearrange(input_x, 'b m n p -> b n (p m)')
 
@@ -231,7 +231,7 @@ class CustomModel(nn.Module):
 # 5. LightningModule封装
 # ---------------------
 class Gpt4tsLightningModule(LightningModule):
-    def __init__(self, num_classes=2, input_dim=4, lr=1e-4, on_phy_loss=True, text_emb_dim=768, use_multimodal=True, model_type="gpt4ts"): # todo input_dim 需要修改：1 Or 4
+    def __init__(self, num_classes=2, input_dim=4, lr=1e-4, on_phy_loss=True, text_emb_dim=768, use_multimodal=True, model_type="gpt4ts"): #  input_dim 需要修改：1 Or 4
         super().__init__()
         self.save_hyperparameters()
         self.model_type = model_type
@@ -658,9 +658,9 @@ def main(args):
 #     # 训练参数
 #     parser.add_argument('--batch_size', type=int, default=16, help='Batch size per GPU')
 #     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
-#     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs (早停可能提前终止)')  # todo
+#     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs (早停可能提前终止)')
 #     parser.add_argument('--num_workers', type=int, default=0, help='Number of data loading workers')
-#     # TODO
+#     #
 #     # 如果有现有的模型，可以直接测试，则打开这个参数项
 #     parser.add_argument('--all', action='store_true',
 #                         help='Enable all innovations')

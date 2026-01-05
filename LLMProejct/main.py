@@ -219,7 +219,7 @@ class FluxDataLoader(Dataset):
     def __len__(self):
         return len(self.X)
 
-    def __getitem__(self, idx): # TODO 等待更新
+    def __getitem__(self, idx):
         x_raw = self.X[idx]  # (1，512)
         y = self.y[idx]
         y = int(y)
@@ -307,7 +307,7 @@ class CustomDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
-            # persistent_workers=True, #避免重复创建子进程的开销 TODO
+            # persistent_workers=True, #避免重复创建子进程的开销
             pin_memory=True,
             collate_fn=collate_fn
         )
@@ -318,7 +318,7 @@ class CustomDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时） TODO
+            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时）
             pin_memory=True,
             collate_fn=collate_fn
         )
@@ -329,17 +329,17 @@ class CustomDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时） TODO
+            # persistent_workers=True,  # 避免重复创建子进程的开销（每个 epoch 开始时）
             pin_memory=True,
             collate_fn=collate_fn
         )
 
 # 定义模型
 class MyTransformerModel(nn.Module):
-    def __init__(self, num_classes=2, input_dim=1, model_type="bert", use_lora=False, text_emb_dim=768, use_multimodal=False): # TODO input_dim
+    def __init__(self, num_classes=2, input_dim=1, model_type="bert", use_lora=False, text_emb_dim=768, use_multimodal=False): #  input_dim
         super().__init__()
         self.model_type = model_type.lower()
-        assert self.model_type in ["bert", "gpt2", "roberta", "deberta", "roberta-c", "moment"], "model_type is not included." # TODO
+        assert self.model_type in ["bert", "gpt2", "roberta", "deberta", "roberta-c", "moment"], "model_type is not included." #
 
         # 获取是否开启多模态
         self.use_multimodal = use_multimodal
@@ -367,7 +367,7 @@ class MyTransformerModel(nn.Module):
         # 输入投影层和分类头
         self.input_proj = nn.Linear(input_dim, self.config.hidden_size)
         self.classifier = nn.Sequential(
-            nn.Linear(self.config.hidden_size, 256), # todo 此处的256是一个可以调整的超参数
+            nn.Linear(self.config.hidden_size, 256), #  此处的256是一个可以调整的超参数
             nn.ReLU(),
             nn.Linear(256, num_classes)
         )
@@ -391,7 +391,7 @@ class MyTransformerModel(nn.Module):
                 # [choice1]
                 # target_modules = ["attn.c_attn"],  # 等价于BERT中的query、key和value
                 # [choice2]
-                # target_modules=["c_attn"],# todo
+                # target_modules=["c_attn"],#
                 # [choice3]
                 # target_modules=[
                 #     "attn.c_attn",
@@ -845,25 +845,25 @@ def main(args):
     # 初始化Trainer，添加早停回调
     trainer = Trainer(
         max_epochs=args.epochs,
-        accelerator='gpu', # todo gpu\cpu
+        accelerator='gpu', # gpu\cpu
         devices="auto", # ← 自动使用所有 CUDA_VISIBLE_DEVICES 中的 GPU
         callbacks=[checkpoint_callback, early_stopping],
         logger=logger,
         log_every_n_steps=100, # 这两条改变，解决日志打印文件太大的问题
         enable_progress_bar=True, # 开启实时进度条
-        # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败 TODO
+        # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败
     )
     if args.model_type == 'deberta':
         trainer = Trainer(
             max_epochs=args.epochs,
             accumulate_grad_batches=2,  # 实际 batch=32，累积2步 → 等效64
-            accelerator='gpu',  # todo gpu\cpu
+            accelerator='gpu',  #  gpu\cpu
             devices="auto",  # ← 自动使用所有 CUDA_VISIBLE_DEVICES 中的 GPU
             callbacks=[checkpoint_callback, early_stopping],
             logger=logger,
             log_every_n_steps=100,  # 这两条改变，解决日志打印文件太大的问题
             enable_progress_bar=True,  # 开启实时进度条
-            # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败 TODO
+            # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败
         )
 
     # 区分训练和 评估模式。训练模式：
@@ -942,7 +942,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size per GPU')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs (早停可能提前终止)') # 训练轮次设置为100，但经常epoch=10时早停
-    parser.add_argument('--num_workers', type=int, default=4, help='Number of data loading workers') # 暂时修改为0 否则改为4 todo dubug
+    parser.add_argument('--num_workers', type=int, default=4, help='Number of data loading workers') # 暂时修改为0 否则改为4
 
     # 以下是自定义参数，方便对程序进行改进和调试
     # 添加实验次数，用于保存相关模型 exp_num

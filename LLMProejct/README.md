@@ -109,14 +109,3 @@ python main.py --model_type gpt4ts --exp_num 1
 
 如此你可以成功复现论文中提到的几乎全部实验。
 
-# IG归因图的复现
-`IG归因图`的代码见`main_vis.py`，其中，`main_vis.py`中的模型路径部分改为你实验中训练好的ckpt文件。（具体见：代码883行处：best_model_path = "TODO"）。
-(给出一个我们的模型ckpt保存地址示例：
-`./K20_outputModels/roberta-c_LoRA_1MMs_2PHY_3MMh_4ENH_2/roberta-c-best-model-epoch=23-val_f2=0.0000.ckpt` 
-)
-然后执行如下指令：
-
-```
-python main_vis.py --model_type roberta-c --use_lora --all
-```
-
