@@ -1,6 +1,7 @@
-# 开启moment lora微调。
 # 在最顶部忽略 torchvision 图像扩展加载失败的警告
 import warnings
+
+from matplotlib import pyplot as plt
 
 warnings.filterwarnings("ignore", category=UserWarning, module="torchvision.io.image")
 
@@ -20,12 +21,10 @@ from torch.utils.data import Dataset, DataLoader
 from peft import get_peft_model, LoraConfig
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, average_precision_score, \
     roc_auc_score, fbeta_score
-from pytorch_lightning import LightningModule, LightningDataModule, Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning import LightningModule, LightningDataModule
 
-from transformers import BertModel, GPT2Model, RobertaModel, DebertaV2Model
-
+from transformers import BertModel, GPT2Model, RobertaModel
+from captum.attr import IntegratedGradients
 # 引入改进后的数据加载函数
 try:
     from sentence_transformers import SentenceTransformer
@@ -35,8 +34,6 @@ except ImportError:
 # 引入物理损失函数：
 from phy_loss import PhysicsRegularizedLoss # 此处的phy_loss即是用了第二版本的v2_loss
 
-# gpt4ts需要用到：
-from gpt4ts_modules import Gpt4tsLightningModule
 
 # 定义模型-路径匹配表
 MODEL_PATH_MAP = {
@@ -44,8 +41,7 @@ MODEL_PATH_MAP = {
     "gpt2": "./models/gpt2",
     "gpt4ts": "./models/gpt2",
     "roberta": "./models/roberta-base",
-    # "moment": "models/moment-1-base", # choise1: small, choise2: base
-    "deberta": "./models/deberta-v3-base",  # ← 新增 DeBERTa 路径
+    "moment": "models/moment-1-small",
     "roberta-c": "./models/chinese-roberta-wwm-ext",
 }
 
@@ -294,10 +290,11 @@ class CustomDataModule(LightningDataModule):
 
     def setup(self, stage=None):
         if stage == "test":
-            self.test_dataset = FluxDataLoader(self.root_path, flag='TEST', encoder=self.encoder,
-                                               on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance)
+            # todo self.test_dataset = FluxDataLoader(self.root_path, flag='TEST', encoder=self.encoder)
+            self.test_dataset = FluxDataLoader(self.root_path, flag='TEST', encoder=self.encoder, on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance)
+
         else:
-            self.train_dataset = FluxDataLoader(self.root_path, flag='TRAIN', encoder=self.encoder, on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance)
+            self.train_dataset = FluxDataLoader(self.root_path, flag='TRAIN', encoder=self.encoder, on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance,)
             self.val_dataset = FluxDataLoader(self.root_path, flag='VAL', encoder=self.encoder, on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance)
             self.test_dataset = FluxDataLoader(self.root_path, flag='TEST', encoder=self.encoder, on_mm_statistics=self.on_mm_statistics, on_mm_history=self.on_mm_history, on_enhance=self.on_enhance)
 
@@ -355,8 +352,6 @@ class MyTransformerModel(nn.Module):
             self.backbone = GPT2Model.from_pretrained(LOCAL_MODEL_PATH)
         elif self.model_type == "roberta":
             self.backbone = RobertaModel.from_pretrained(LOCAL_MODEL_PATH)
-        elif self.model_type == "deberta":
-            self.backbone = DebertaV2Model.from_pretrained(LOCAL_MODEL_PATH)
         self.config = self.backbone.config
 
         # 如果没有用LoRA, 只微调input_proj和classifier
@@ -397,8 +392,6 @@ class MyTransformerModel(nn.Module):
                 #     "attn.c_attn",
                 #     "attn.c_proj",
                 # ],
-            elif self.model_type == "deberta":
-                my_target_modules = ["query_proj", "key_proj", "value_proj", "dense"]
 
             peft_config = LoraConfig(
                 task_type=None,
@@ -415,7 +408,7 @@ class MyTransformerModel(nn.Module):
         # === . Optional: Inject compressed text as additional channels ===
         x = input_ids
         if text_emb is not None: # 添加文本（统计信息）嵌入
-            # Compress text: [B, text_dim] -> [B, L]
+            # Compress text: [B, 768] -> [B, 512]
             text_comp = self.text_act(self.text_proj(text_emb))  # [B, k], k <=4
             x = torch.cat([input_ids, text_comp.unsqueeze(-1)], dim=-1)  # [B, L, C + C]
 
@@ -423,7 +416,9 @@ class MyTransformerModel(nn.Module):
             his_comp = self.text_act(self.text_proj(his_emb))
             x = torch.cat([x, his_comp.unsqueeze(-1)], dim=-1)
 
+        # 原始输入：
         embedded = self.input_proj(x)
+        # 仅用光变曲线推理，其他模态通道填充 fill_value（通常为 0）：
 
         # 处理attention_mask
         if attention_mask is None:
@@ -434,7 +429,7 @@ class MyTransformerModel(nn.Module):
             )
 
         # 前向传播
-        if self.model_type == "bert" or self.model_type == "roberta" or self.model_type == "deberta" or self.model_type == "roberta-c":
+        if self.model_type == "bert" or self.model_type == "roberta" or self.model_type == "roberta-c":
             outputs = self.backbone(inputs_embeds=embedded) # 需要构造的：(batch_size, seq_len, bert_hidden_size)
         elif self.model_type == "gpt2":
             # GPT2 默认是 causal，但我们传入 attention_mask 全1，等效于双向（非自回归）
@@ -769,6 +764,104 @@ class MyTransformerLightningModule(LightningModule):
             print(f"Full model saved to {path}/pytorch_model.bin")
 
 
+def predict_lc_only(model_wrapper, lc):
+    """
+    仅用光变曲线预测，自动补零其他模态通道。
+    假设训练时总通道数 = 3 (1 lc + 1 text + 1 his)
+    """
+    model = model_wrapper.model
+    model.eval()
+    if lc.dim() == 2:
+        lc = lc.unsqueeze(-1)  # [B, L, 1]
+    B, L, _ = lc.shape
+
+    # 补两个零通道（text + his）
+    zeros = torch.zeros(B, L, 3, device=lc.device, dtype=lc.dtype)  # 3 = 1+1+1
+    x_full = torch.cat([lc, zeros], dim=-1)  # [B, L,4]
+
+    # 直接调用 backbone 路径
+    embedded = model.input_proj(x_full)
+    attn_mask = torch.ones(B, L, dtype=torch.long, device=lc.device)
+
+    if model.model_type in ["bert", "roberta"]:
+        outputs = model.backbone(inputs_embeds=embedded)
+    else:  # gpt2
+        outputs = model.backbone(inputs_embeds=embedded, attention_mask=attn_mask)
+
+    cls_emb = outputs.last_hidden_state[:, 0, :]
+    logits = model.classifier(cls_emb)
+    return logits
+
+
+# ——————————————————————————————
+# 🔹 STEP 2: 计算 Integrated Gradients
+# ——————————————————————————————
+
+def compute_ig_attribution(model_wrapper, lc, target_class=1, n_steps=100, baseline_type="zeros"):
+    """
+    对单条光变曲线计算 IG 归因。
+    """
+    device = next(model_wrapper.parameters()).device
+    if isinstance(lc, np.ndarray):
+        lc = torch.tensor(lc, dtype=torch.float32)
+    if lc.dim() == 1:
+        lc = lc.unsqueeze(0)  # [1, T]
+    lc = lc.to(device)
+
+    T = lc.shape[1]
+
+    # 基线选择
+    if baseline_type == "zeros":
+        baseline = torch.zeros_like(lc)
+    elif baseline_type == "mean":
+        baseline = torch.full_like(lc, lc.mean())
+    else:
+        baseline = torch.zeros_like(lc)
+
+    # 定义 IG 所需的前向函数（只接受 lc）
+    def forward_fn(x):
+        return predict_lc_only(model_wrapper, x)
+
+    ig = IntegratedGradients(forward_fn)
+    attributions = ig.attribute(
+        inputs=lc,
+        baselines=baseline,
+        target=target_class,
+        n_steps=n_steps
+    )  # [1, T]
+
+    return attributions.squeeze(0).cpu().numpy()  # [T,]
+
+
+# ——————————————————————————————
+# 🔹 STEP 3: 可视化与报告
+# ——————————————————————————————
+
+def plot_and_save_ig(x, attribution, label, out_path="figure7a_ig"):
+    fig, ax1 = plt.subplots(figsize=(12, 4))
+
+    color = 'black'
+    ax1.set_xlabel('Time Index')
+    ax1.set_ylabel('Flux (normalized)', color=color)
+    ax1.plot(x, color=color, linewidth=1.2, alpha=0.9)
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.grid(True, alpha=0.3)
+
+    ax2 = ax1.twinx()
+    color = 'red'
+    ax2.set_ylabel('|Attribution|', color=color)
+    ax2.fill_between(np.arange(len(attribution)), 0, np.abs(attribution), color=color, alpha=0.5)
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    plt.title(f'Integrated Gradients Attribution (Label={label})')
+    fig.tight_layout()
+    plt.savefig(out_path, dpi=300, bbox_inches='tight')
+    plt.show()
+
+
+# ——————————————————————————————
+# 🔹 STEP 4: 主执行逻辑
+# ——————————————————————————————
 def main(args):
     # 设置随机种子
     fix_seed = 2025
@@ -776,163 +869,157 @@ def main(args):
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
 
-    # 初始化数据模块
-    data_module = CustomDataModule(
-        root_path=args.root_path,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        encoder=args.encoder,
-        on_mm_statistics=args.on_mm_statistics,
-        on_mm_history=args.on_mm_history,
-        on_enhance=args.on_enhance,
-    )
+    # 重写测试逻辑
+    # 1. 本地（A100）加载模型
+    # best_model_path = "./outputModels/bert_LoRA_MM_ENH_PHY_THR/bert-best-model-epoch=00-val_f2=0.0000.ckpt" # dim对应 384
+    # best_model_path = "./K20_outputModels/moment_NoLoRA_1MMs_2PHY_3MMh_4ENH_2/roberta-best-model-epoch=03-val_f2=0.0000-v1.ckpt" # dim对应 768 TODO
+    # best_model_path = "./K20_outputModels/roberta-c_LoRA_1MMs_2PHY_3MMh_4ENH_2/roberta-c-best-model-epoch=18-val_f2=0.0000.ckpt"  # dim对应 768
+    # best_model_path = "./K20_outputModels/roberta-c_LoRA_1MMs_2PHY_3MMh_4ENH_2/roberta-c-best-model-epoch=23-val_f2=0.0000.ckpt"  # dim对应 768
+    best_model_path = "TODO"
+    # 2. 运行测试
+    # data_module.setup(stage='test')
+    # trainer.test(best_model, data_module.test_dataloader())
+    model = MyTransformerLightningModule.load_from_checkpoint(best_model_path)
 
-    # print(f"✅ 传递到DataModule的参数：on_mm_statistics={args.on_mm_statistics}, on_mm_history={args.on_mm_history}")
-    
-    # 初始化模型
-    # if args.model_type == 'moment':
-    #     model = MomentLightningModule(
-    #         num_classes=args.num_classes,
-    #         input_dim=args.input_dim,
-    #         lr=args.lr,
-    #         use_lora=args.use_lora,
-    #         on_phy_loss=args.on_phy_loss,
-    #         use_multimodal=args.use_multimodal
-    #     )
-    if args.model_type == 'gpt4ts':
-        model = Gpt4tsLightningModule(
-            num_classes=args.num_classes,
-            input_dim=args.input_dim,
-            lr=args.lr,
-            on_phy_loss=args.on_phy_loss,
-            use_multimodal=args.use_multimodal
-        )
-    else:
-        model = MyTransformerLightningModule(
-            num_classes=args.num_classes,
-            input_dim=args.input_dim,
-            model_type=args.model_type,
-            use_lora=args.use_lora,
-            lr=args.lr,
-            text_emb_dim=args.text_emb_dim,
-            use_multimodal=args.use_multimodal,
-            # on_val_dynamic_threshold=args.on_val_dynamic_threshold # 【val_dynamic_threshold】经过实验，效果一般，暂时不考虑
-        )
-        if args.model_type == 'deberta':
-            model.model.backbone.gradient_checkpointing_enable()
+    # 📁 创建输出目录
+    os.makedirs("visK20_roberta_no_times", exist_ok=True)
 
-    # 配置检查点回调
-    checkpoint_callback = ModelCheckpoint(
-        monitor='val_f1_pos',
-        dirpath=args.output_dir,
-        filename=f'{args.model_type}-best-model-{{epoch:02d}}-{{val_f2:.4f}}',
-        save_top_k=1, # 最多保留1个最好的模型
-        mode='max'
-    )
+    # SAMPLE_INDEX = 3  # 分析第几个样本
+    # LC_DATA_PATH = f"singleData_n/lc_data_{SAMPLE_INDEX}.npy" # todo
+    # LABEL_DATA_PATH = f"singleData/label_data_{SAMPLE_INDEX}.npy"
+    #
+    # # 📥 加载数据
+    # lc_data = np.load(LC_DATA_PATH)  # [N, 512]
+    # label_data = np.load(LABEL_DATA_PATH)  # [N,]
+    #
+    # x = lc_data  # [512,]
+    # y = int(label_data)
+    #
+    # print(f"Analyzing sample {SAMPLE_INDEX}: label = {y} ({'flare' if y == 1 else 'no flare'})")
+    #
+    # # 🔍 计算 IG
+    # print("Computing Integrated Gradients...")
+    # attr = compute_ig_attribution(model, x, target_class=1, n_steps=100)
+    #
+    # # 🖼️ 可视化
+    # plot_and_save_ig(x[0], attr, y, out_prefix="figure7a_ig")
 
-    # 配置早停回调（耐心值10轮）
-    early_stopping = EarlyStopping(
-        monitor='val_f1_pos',  # 监视验证准确率
-        patience=10,  # 早停轮数
-        mode='max',  # 最大化准确率
-        verbose=True,
-        check_finite=True
-    )
+    # 🔁 遍历 12 个样本
+    for SAMPLE_INDEX in range(6):
+        # 尝试从正例路径加载 label；如果失败，说明是负例
+        LABEL_DATA_PATH = f"singleData/label_data_{SAMPLE_INDEX}.npy"
+        label_data = np.load(LABEL_DATA_PATH)
+        is_positive = True
+        LC_DATA_PATH = f"singleData/lc_data_{SAMPLE_INDEX}.npy"
 
-    # 配置TensorBoard日志
-    logger = TensorBoardLogger(save_dir='logs', name=f'{args.model_type}', version=args.exp_id)
-
-    # 初始化Trainer，添加早停回调
-    trainer = Trainer(
-        max_epochs=args.epochs,
-        accelerator='gpu', # todo gpu\cpu
-        devices="auto", # ← 自动使用所有 CUDA_VISIBLE_DEVICES 中的 GPU
-        callbacks=[checkpoint_callback, early_stopping],
-        logger=logger,
-        log_every_n_steps=100, # 这两条改变，解决日志打印文件太大的问题
-        enable_progress_bar=True, # 开启实时进度条
-        # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败 TODO
-    )
-    if args.model_type == 'deberta':
-        trainer = Trainer(
-            max_epochs=args.epochs,
-            accumulate_grad_batches=2,  # 实际 batch=32，累积2步 → 等效64
-            accelerator='gpu',  # todo gpu\cpu
-            devices="auto",  # ← 自动使用所有 CUDA_VISIBLE_DEVICES 中的 GPU
-            callbacks=[checkpoint_callback, early_stopping],
-            logger=logger,
-            log_every_n_steps=100,  # 这两条改变，解决日志打印文件太大的问题
-            enable_progress_bar=True,  # 开启实时进度条
-            # strategy="ddp_find_unused_parameters_true" # <- 若并非所有模型参数都被使用，则开启这个，避免多卡训练失败 TODO
-        )
-
-    # 区分训练和 评估模式。训练模式：
-    if not args.model_eval:
-        # 训练模型
-        trainer.fit(model, data_module)
-
-        # 保存最终模型（如果未被早停）
-        final_model_path = os.path.join(args.output_dir, 'final_model')
-        model.save_model(final_model_path)
-
-        # 👇 关键：释放 GPU 显存
-        model.cpu()
-        del model  # 删除模型引用
-
-        # 加载最佳模型并测试
-        print("Loading best model for testing...")
-        best_model_path = checkpoint_callback.best_model_path
-    # 评估模式：
-    else:
-        # best_model_path = "./outputModels/bert_LoRA_MM_ENH_PHY_THR/bert-best-model-epoch=00-val_f2=0.0000.ckpt" # dim对应 384
-        # best_model_path = "./K20_outputModels/roberta-c_LoRA_1MMs_2PHY_3MMh_4ENH_2/roberta-c-best-model-epoch=18-val_f2=0.0000.ckpt" # dim对应 768
-        best_model_path = "./K20_outputModels/roberta-c_LoRA_1MMs_2PHY_3MMh_4ENH_2/roberta-c-best-model-epoch=23-val_f2=0.0000.ckpt" # dim对应 768
-
-        data_module.setup(stage='test')
-
-    if best_model_path and os.path.exists(best_model_path):
-        # 运行测试
-        print("Best model found!!!")
-
-        # 从检查点加载模型
-        # if args.model_type == 'moment':
-        #     best_model = MomentLightningModule.load_from_checkpoint(best_model_path)
-        if args.model_type == 'gpt4ts':
-            best_model = Gpt4tsLightningModule.load_from_checkpoint(best_model_path)
-            print("Loaded input_dim =", best_model.hparams.input_dim) 
+        # 加载光变曲线数据
+        lc_data = np.load(LC_DATA_PATH)  # shape: [512,] 或 [1, 512]？根据你的情况调整
+        if lc_data.ndim == 2 and lc_data.shape[0] == 1:
+            x = lc_data[0]  # 提取一维序列
         else:
-            best_model = MyTransformerLightningModule.load_from_checkpoint(best_model_path)
+            x = lc_data  # 假设已经是 [512,]
 
-        # ⭐ 关键：重新运行 validation loop 以填充 val_probs / val_trues
-        # trainer.validate(best_model, data_module.val_dataloader())  # ← 新增这行！
+        y = int(label_data)
+        prefix = "pos" if is_positive else "neg"
 
-        trainer.test(best_model, data_module.test_dataloader())
+        print(f"Analyzing sample {SAMPLE_INDEX}: label = {y} ({'flare' if y == 1 else 'no flare'})")
 
-        if not args.model_eval:
-            # 保存测试后的最佳模型到独立目录（用来部署）
-            deploy_model_dir = os.path.join(args.output_dir, f'best_deploy_model_{args.model_type}_textEncoder_{args.encoder}')
-            best_model.save_model(deploy_model_dir)
-            print(f"Deployment model saved to: {deploy_model_dir}")
-    else:
-        print("No best model found, using last trained model for testing")
+        # 🔍 计算 Integrated Gradients
+        print(f"Computing Integrated Gradients for sample {SAMPLE_INDEX}...")
+        attr = compute_ig_attribution(model, x, target_class=1, n_steps=100)
 
-        # ⭐ 关键：重新运行 validation loop 以填充 val_probs / val_trues
-        trainer.validate(model, data_module.val_dataloader())  # ← 新增这行！
+        # 🖼️ 可视化并保存图片
+        img_path = f"visK20_roberta_no_times/ig_{prefix}_{SAMPLE_INDEX}.png"
+        plot_and_save_ig(x, attr, y, out_path=img_path)  # 注意：这里假设 plot_and_save_ig 接受 out_path 而非 prefix
 
-        # 使用最后训练的模型进行测试
-        trainer.test(model, data_module.test_dataloader())
+        # 💾 保存文本说明
+        txt_path = f"visK20_roberta_no_times/ig_{prefix}_{SAMPLE_INDEX}.txt"
+        center_of_mass = np.sum(np.abs(attr) * np.arange(len(attr))) / (np.sum(np.abs(attr)) + 1e-8)
+        top_idx = np.argmax(np.abs(attr))
 
-        if not args.model_eval:
-            deploy_model_dir = os.path.join(args.output_dir, f'last_deploy_model_{args.model_type}')
-            model.save_model(deploy_model_dir)
-            print(f"Last model saved for deployment: {deploy_model_dir}")
+        with open(txt_path, 'w') as f:
+            f.write(f"Sample Index: {SAMPLE_INDEX}\n")
+            f.write(f"Label: {y} ({'flare' if y == 1 else 'no flare'})\n")
+            f.write(f"Class Type: {'positive (flare)' if is_positive else 'negative (no flare)'}\n")
+            f.write(f"Input Length: {len(x)}\n")
+            f.write(f"IG Steps: 100, Baseline: zeros\n\n")
+
+            # 归因统计
+            f.write(f"Attribution Statistics:\n")
+            f.write(f"  Mean: {np.mean(attr):.6f}\n")
+            f.write(f"  Std:  {np.std(attr):.6f}\n")
+            f.write(f"  Max |Attr|: {np.max(np.abs(attr)):.6f} at time step {top_idx}\n")
+            f.write(f"  Center of Mass: {center_of_mass:.1f} / {len(x)}\n\n")
+
+            # Top-5 重要时间步
+            f.write("Top 5 most important time steps (by |IG|):\n")
+            top_indices = np.argsort(np.abs(attr))[-5:][::-1]
+            for idx in top_indices:
+                f.write(f"  Time step {idx}: IG = {attr[idx]:.6f}, LC value = {x[idx]:.6f}\n")
+
+            f.write("\nNote: Attribution highlights time steps most responsible for predicting a stellar flare.\n")
+    for SAMPLE_INDEX in range(6):
+        # 负例
+        LABEL_DATA_PATH = f"singleData_n/label_data_{SAMPLE_INDEX}.npy"
+        LC_DATA_PATH = f"singleData_n/lc_data_{SAMPLE_INDEX}.npy"
+        label_data = np.load(LABEL_DATA_PATH)
+        is_positive = False
+
+        # 加载光变曲线数据
+        lc_data = np.load(LC_DATA_PATH)  # shape: [512,] 或 [1, 512]？根据你的情况调整
+        if lc_data.ndim == 2 and lc_data.shape[0] == 1:
+            x = lc_data[0]  # 提取一维序列
+        else:
+            x = lc_data  # 假设已经是 [512,]
+
+        y = int(label_data)
+        prefix = "pos" if is_positive else "neg"
+
+        print(f"Analyzing sample {SAMPLE_INDEX}: label = {y} ({'flare' if y == 1 else 'no flare'})")
+
+        # 🔍 计算 Integrated Gradients
+        print(f"Computing Integrated Gradients for sample {SAMPLE_INDEX}...")
+        attr = compute_ig_attribution(model, x, target_class=1, n_steps=100)
+
+        # 🖼️ 可视化并保存图片
+        img_path = f"visK20_roberta_no_times/ig_{prefix}_{SAMPLE_INDEX}.png"
+        plot_and_save_ig(x, attr, y, out_path=img_path)  # 注意：这里假设 plot_and_save_ig 接受 out_path 而非 prefix
+
+        txt_path = f"visK20_roberta_no_times/ig_{prefix}_{SAMPLE_INDEX}.txt"
+        center_of_mass = np.sum(np.abs(attr) * np.arange(len(attr))) / (np.sum(np.abs(attr)) + 1e-8)
+        top_idx = np.argmax(np.abs(attr))
+
+        with open(txt_path, 'w') as f:
+            f.write(f"Sample Index: {SAMPLE_INDEX}\n")
+            f.write(f"Label: {y} ({'flare' if y == 1 else 'no flare'})\n")
+            f.write(f"Class Type: {'positive (flare)' if is_positive else 'negative (no flare)'}\n")
+            f.write(f"Input Length: {len(x)}\n")
+            f.write(f"IG Steps: 100, Baseline: zeros\n\n")
+
+            # 归因统计
+            f.write(f"Attribution Statistics:\n")
+            f.write(f"  Mean: {np.mean(attr):.6f}\n")
+            f.write(f"  Std:  {np.std(attr):.6f}\n")
+            f.write(f"  Max |Attr|: {np.max(np.abs(attr)):.6f} at time step {top_idx}\n")
+            f.write(f"  Center of Mass: {center_of_mass:.1f} / {len(x)}\n\n")
+
+            # Top-5 重要时间步
+            f.write("Top 5 most important time steps (by |IG|):\n")
+            top_indices = np.argsort(np.abs(attr))[-5:][::-1]
+            for idx in top_indices:
+                f.write(f"  Time step {idx}: IG = {attr[idx]:.6f}, LC value = {x[idx]:.6f}\n")
+
+            f.write("\nNote: Attribution highlights time steps most responsible for predicting a stellar flare.\n")
+    print("✅ All 12 samples processed and saved to visK20/")
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Stellar Forecasting with LLM and LoRA using PyTorch Lightning')
 
     # 数据参数
-    parser.add_argument('--root_path', type=str, default='./myDataK20', help='Path to my data')
-    parser.add_argument('--output_dir', type=str, default='./K20_outputModels', help='Output directory for saved model')
+    parser.add_argument('--root_path', type=str, default='./myDataK', help='Path to my data')
+    parser.add_argument('--output_dir', type=str, default='./final_output_models_kep', help='Output directory for saved model')
 
     # 模型参数
     parser.add_argument('--num_classes', type=int, default=2, help='Number of output classes')
@@ -998,9 +1085,9 @@ if __name__ == "__main__":
 
 
     if args.dataset == "kepler":
-        args.root_path = "./myDataK20"
+        args.root_path = "./myDataK"
     elif args.dataset == "tess":
-        args.root_path = "./myDataT20"
+        args.root_path = "./myDataT"
     else:
         raise ValueError(f"Unsupported dataset: {args.dataset}")
 
@@ -1074,3 +1161,4 @@ if __name__ == "__main__":
 
     # 主函数
     main(args)
+

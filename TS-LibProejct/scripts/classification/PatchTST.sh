@@ -9,7 +9,7 @@ model_name=PatchTST
 python -u run.py \
   --task_name classification \
   --is_training 1 \
-  --root_path ./myDataK \
+  --root_path ./myDataK20 \
   --model_id tessPatchTST \
   --model $model_name \
   --data UEA \

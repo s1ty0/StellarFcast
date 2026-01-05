@@ -9,12 +9,12 @@ model_name=iTransformer
 python -u run.py \
   --task_name classification \
   --is_training 1 \
-  --root_path ./myDataK \
+  --root_path ./myDataK20 \
   --model_id tessiTransformer \
   --model $model_name \
   --data UEA \
   --e_layers 3 \
-  --batch_size 16 \
+  --batch_size 64 \
   --d_model 2048 \
   --d_ff 256 \
   --top_k 3 \

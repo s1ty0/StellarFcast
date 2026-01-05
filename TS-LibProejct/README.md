@@ -15,10 +15,9 @@ pip install -r requirements.txt
 确保当下目录存在以下文件夹：
 
 ```
-├── myDataK # 提前构建好的数据集存放目录（kepler）
-├── myDataT # 提前构建好的数据集存放目录（tess）
+├── myDataK20 # 提前构建好的数据集存放目录（kepler）
+├── myDataT20 # 提前构建好的数据集存放目录（tess）
 ```
-
 
 
 对应的复现指令（注：脚本后面携带的数字，代表指定的`cuda gpu`序号）：
@@ -50,8 +49,8 @@ sh ./scripts/classification/MICN.sh 1 --on_phy_loss --on_enhance --on_mm_statist
 ```
 比如：
 # Autoformer.sh中：
-  --root_path ./myDataK \
+  --root_path ./myDataK20 \
 改为：
-  --root_path ./myDataT \
+  --root_path ./myDataT20 \
 ```
 

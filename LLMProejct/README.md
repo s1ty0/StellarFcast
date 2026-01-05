@@ -17,38 +17,20 @@ pip install -r requirements.txt
 ```
 bert_base_uncased # https://huggingface.co/google-bert/bert-base-uncased
 gpt2 # https://huggingface.co/openai-community/gpt2
-MOMENT-1-large # https://huggingface.co/AutonLab/MOMENT-1-large
-roberta-base # https://huggingface.co/FacebookAI/roberta-base
+roberta(chinese-roberta-wwm-ext ) # https://huggingface.co/hfl/chinese-roberta-wwm-ext
+deberta-v3-base # https://huggingface.co/microsoft/deberta-v3-base
 ```
 
-下载好后，确保当下目录存在以下文件夹及文件：
+下载好后，确保当下目录存在以下文件夹：
 
 ```
 ├── models
 │   ├── bert_base_uncased
-│   │   ├── config.json
-│   │   ├── model.safetensors
-│   │   ├── pytorch_model.bin
-│   │   ├── tokenizer_config.json
-│   │   ├── tokenizer.json
-│   │   └── vocab.txt
-│   ├── gpt2
-│   │   ├── config.json
-│   │   ├── generation_config.json
-│   │   ├── model.safetensors
-│   │   ├── pytorch_model.bin
-│   │   ├── tokenizer_config.json
-│   │   └── vocab.json
-│   ├── MOMENT-1-large
-│   └── roberta-base
-│       ├── model.safetensors
-│       ├── pytorch_model.bin
-│       ├── rust_model.ot
-│       ├── tf_model.h5
-│       ├── tokenizer.json
-│       └── vocab.json
-├── myDataK # 提前构建好的数据集存放目录 （kepelr）
-├── myDataT # 提前构建好的数据集存放目录 （tess）
+│   ├── gpt2 
+│   ├── deberta-v3-base
+│   └── chinese-roberta-wwm-ext
+├── myDataK20 # 提前构建好的数据集存放目录 （kepelr）
+├── myDataT20 # 提前构建好的数据集存放目录 （tess）
 ```
 
 
@@ -58,34 +40,39 @@ roberta-base # https://huggingface.co/FacebookAI/roberta-base
 对应的复现指令如下：
 
 ```
-# # 以下是改进点开启后的复现指令：
+# # 以下是全部改进点开启后的复现指令：（建议在指令前加上：CUDA_VISIBLE_DEVICES=TODO, 来指明所用的GPU，若不加，代表使用所有可用的GPU）
 # Kepler数据上：
 # gpt2 模型
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type gpt2 --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+python main.py --model_type gpt2 --use_lora --exp_num 1  --all --dataset kepler
 
 # bert模型
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+python main.py --model_type bert --use_lora --exp_num 1  --all --dataset kepler
 
 # roberta模型
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+python main.py --model_type roberta-c --use_lora --exp_num 1  --all --dataset kepler
+
+# deberta模型
+python main.py --model_type deberta --use_lora --exp_num 1  --all --dataset kepler
 
 # 尝试复现的FLARE
-CUDA_VISIBLE_DEVICES=O python main_flare.py --dataset kepler
-
+python main_flare.py --dataset kepler
 
 
 # TESS 数据上：
 # gpt2 模型
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type gpt2 --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset tess
+python main.py --model_type gpt2 --use_lora --exp_num 1  --all --dataset tess
 
 # bert模型
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset tess
+python main.py --model_type bert --use_lora --exp_num 1  --all --dataset tess
 
 # roberta模型
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset tess
+python main.py --model_type roberta-c --use_lora --exp_num 1  --all --dataset tess
+
+# deberta模型
+python main.py --model_type deberta --use_lora --exp_num 1  --all --dataset tess
 
 # 尝试复现的FLARE
-CUDA_VISIBLE_DEVICES=O python main_flare.py --dataset tess
+python main_flare.py --dataset tess
 ```
 
 
@@ -95,39 +82,41 @@ CUDA_VISIBLE_DEVICES=O python main_flare.py --dataset tess
 ```
 # kepler数据
 # 关闭--on_mm_history
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics  --dataset kepler
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics  --dataset kepler
 
 # --on_mm_statistics
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance  --on_mm_history --dataset kepler
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance  --on_mm_history --dataset kepler
 
 # 关闭--on_enhance
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 
 # 关闭--on_phy_loss
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type bert --use_lora --exp_num 1 --encoder bert-chinese --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 ```
 
 
-复现`momoent`，需要执行如下指令，来安装复现`moment`需要的依赖：
+复现`gpt4ts`，需要执行如下指令:
 
 ```
-pip install git+https://github.com/moment-timeseries-foundation-model/moment.git
-```
+# 改进点加入后(all):
+python main.py --model_type gpt4ts --exp_num 1 --all
 
-然后执行：
-
-```
-main_moment.py TODO
-```
-
-
-
-复现gpt4ts
-
-```
-main_gpt4ts.py TODO
+# 改进点未加入之前（base）:
+python main.py --model_type gpt4ts --exp_num 1
 ```
 
 
 
-如此绝大部分实验你都可以成功复现。
+如此你可以成功复现论文中提到的几乎全部实验。
+
+# IG归因图的复现
+`IG归因图`的代码见`main_vis.py`，其中，`main_vis.py`中的模型路径部分改为你实验中训练好的ckpt文件。（具体见：代码883行处：best_model_path = "TODO"）。
+(给出一个我们的模型ckpt保存地址示例：
+`./K20_outputModels/roberta-c_LoRA_1MMs_2PHY_3MMh_4ENH_2/roberta-c-best-model-epoch=23-val_f2=0.0000.ckpt` 
+)
+然后执行如下指令：
+
+```
+python main_vis.py --model_type roberta-c --use_lora --all
+```
+

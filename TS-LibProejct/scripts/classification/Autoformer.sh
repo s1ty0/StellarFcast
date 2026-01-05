@@ -9,12 +9,12 @@ model_name=Autoformer
 python -u run.py \
   --task_name classification \
   --is_training 1 \
-  --root_path ./myDataK \
+  --root_path ./myDataK20 \
   --model_id tessAutoformer \
   --model $model_name \
   --data UEA \
   --e_layers 3 \
-  --batch_size 16 \
+  --batch_size 64 \
   --d_model 128 \
   --d_ff 256 \
   --top_k 3 \

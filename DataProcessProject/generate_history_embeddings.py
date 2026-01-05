@@ -59,7 +59,7 @@ def extract_flare_times_from_labels(mask_data: np.ndarray):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_root", type=str, default="./myDataH")
+    parser.add_argument("--data_root", type=str, default="./myDataT20")
     parser.add_argument("--split", type=str, choices=["train", "val", "test"], default="val")
     parser.add_argument("--encoder", type=str, default="bert-chinese")
     parser.add_argument("--max_length", type=int, default=128)
@@ -67,13 +67,22 @@ def main():
         "--dataset",
         type=str,
         choices=["kepler", "tess"],
-        required=True,
+        required=False,
+        default="tess",
         help="Dataset identifier: 'kepler' or 'tess'"
     )
+    parser.add_argument('--impute_method', type=str, default='linear',
+                        choices=['knn', 'periodic', 'linear'],
+                        help='缺失值插值方法 (knn/periodic/linear)')
     args = parser.parse_args()
     if args.dataset == "kepler":
-        args.data_root = "./myDataK"
+        args.data_root = "./myDataK20"
 
+    if args.impute_method == "knn":
+        args.data_root = "./myDataK20_knn"
+
+    if args.impute_method == "periodic":
+        args.data_root = "./myDataK20_periodic"
 
     # 路径
     data_dir = os.path.join(args.data_root, args.split)

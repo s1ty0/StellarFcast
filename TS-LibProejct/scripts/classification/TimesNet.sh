@@ -7,7 +7,7 @@ export CUDA_VISIBLE_DEVICES=$GPU_ID
 python -u run.py \
   --task_name classification \
   --is_training 1 \
-  --root_path ./myDataK \
+  --root_path ./myDataK20 \
   --model_id tessTimesNet \
   --model TimesNet \
   --data UEA \

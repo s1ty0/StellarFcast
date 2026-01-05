@@ -59,6 +59,18 @@ sh ./data_pipeline_tess.sh
 ./myDataK # 存放得到的Kepler数据
 ./myDataT # 存放得到的TESS数据
 ```
+为了减轻实验的负担量，我们进行了一个数据下采样处理，执行：
+```
+python createK20.py
+python createT20.py
+```
+
+将会得到两个文件夹：
+
+```
+./myDataK20 # 存放得到的下采样的Kepler数据
+./myDataT20 # 存放得到的下采样的TESS数据
+```
 这样，我们就完成了基础的数据准备工作。
 
 等等！先别急，我们进行实验所必需的，一些改进点的引入，仍需要构建history和statistics的嵌入
@@ -72,11 +84,11 @@ python encoderDown.py
 然后，执行如下脚本，得到history和statistics的嵌入：
 
 ```
-sh ./data_pipeline_kepler.sh
-sh ./data_pipeline_tess.sh
+sh ./model_build_emb_pipeline_k.sh
+sh ./model_build_emb_pipeline_t.sh
 ```
 
-随后将这俩文件夹：`myDataK` 和 `myDataT`
+随后将这俩文件夹：`myDataK20` 和 `myDataT20`
 
 分别复制、粘贴到`LLMProject文件夹`和`TS-LibProject文件夹`下。这样，我很高兴的向你宣告数据处理章节的结束。
 
