@@ -1,29 +1,23 @@
-# 1. 硬件信息
-我们的所有实验，在单卡`NVIDIA A100 Tensor Core GPU`运行。
+# 1. Hardware Information
+All experiments were conducted on a single `NVIDIA A100 Tensor Core GPU` device.
 
 
+# 2. Virtual Environment Configuration
 
-# 1. 虚拟环境的配置
-
-我们根据执行环境的不同，配置了两套虚拟环境:
-一套用于时序基础模型的复现（具体见：`TS-LibProejct文件夹`，注意，这里的`python需用到3.8版本`）
-一套用于时序大模型的复现（具体见：`LLMProject文件夹`，此处的`python`无限制，可以只用最新版本的）
-我们推荐使用`conda`来管理虚拟环境，这样会方便很多。具体`conda`的使用方法请自行搜索。
-
+We configured two virtual environments based on the execution requirements:
+- One for reproducing the time-series foundation models (see: `TS-LibProejct folder`, note that Python 3.8 is required here).
+- One for reproducing the time-series large models (see: `LLMProject folder`, where Python has no version restrictions and can use the latest version).
+We recommend using `conda` to manage virtual environments, as it simplifies the process significantly. For details on `conda` usage, please refer to official documentation or search online.
 
 
-# 2. 数据准备
+# 3. Data Preparation
 
-数据的准备见`DataProcessProject`文件夹，阅读其`README文件`,并跟着实验。实验成功后，才可进入下一步`复现`
+Refer to the `DataProcessProject` folder for data preparation. Read its `README file` and follow the experimental steps. Proceed to the next step (reproduction) only after successfully completing the experiment.
 
 
+# 4. Model Reproduction
 
-# 3. 复现
-
-主要的模型复现分为两部分：
-
-- Part1. 时序基础模型的复现`TS-LibProejct文件夹`
-
-- Part2. 时序大模型的复现`LLMProject文件夹`
-
-分别的复现指导可见对应文件夹下的`README.md`
+The main model reproduction is divided into two parts:
+Part 1: Reproduction of time-series foundation models (`TS-LibProejct folder`)
+Part 2: Reproduction of time-series large models (`LLMProject folder`)
+Detailed reproduction instructions are available in the README.md file within each corresponding folder.

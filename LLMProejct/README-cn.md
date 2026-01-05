@@ -1,15 +1,19 @@
-# Virtual Environment Configuration
+'# 虚拟环境的配置
 
-Simply configure the environment according to `requirements.txt` (we recommend using conda commands to create a new virtual environment to easily distinguish it from the `TS-LibProject` virtual environment).
+按照`requirements.txt`配置即可(推荐用conda的指令新建虚拟环境，方便同`TS-LibProject`的虚拟环境作区分)
+
 ```
 pip install -r requirements.txt
 ```
 
-I have to remind you that if you encounter unexpected errors while installing dependencies, I recommend asking a large language model for help. All the packages required for the experiment have been listed, so unexpected errors should not occur.
+我不得不提醒你的是，如果在安装依赖的时候碰到了一些意外的错误，我推荐你询问大模型寻求帮助，实验所需的所有包已经列出，应该不会出现意外的错误。
 
-# Downloading Pretrained Large Language Models
 
-In our experiments, we used the following pretrained large language models. Simply download them from their corresponding `Hugging Face` pages (URLs are listed on the right) to your local machine, as our experiments load the large language models locally.
+
+# 预训练大语言模型的下载
+
+我们实验中用了以下预训练大语言模型，在对应的`huggingface`下载到本地即可(对应的网址已经罗列在右面)，因为实验中采用的是从本地加载大语言模型的方式。
+
 ```
 bert_base_uncased # https://huggingface.co/google-bert/bert-base-uncased
 gpt2 # https://huggingface.co/openai-community/gpt2
@@ -17,7 +21,7 @@ roberta(chinese-roberta-wwm-ext ) # https://huggingface.co/hfl/chinese-roberta-w
 deberta-v3-base # https://huggingface.co/microsoft/deberta-v3-base
 ```
 
-After downloading, ensure that the following directories exist in your current working directory:
+下载好后，确保当下目录存在以下文件夹：
 
 ```
 ├── models
@@ -25,82 +29,84 @@ After downloading, ensure that the following directories exist in your current w
 │   ├── gpt2 
 │   ├── deberta-v3-base
 │   └── chinese-roberta-wwm-ext
-├── myDataK20 #  （kepelr）
-├── myDataT20 #  （tess）
+├── myDataK20 # 提前构建好的数据集存放目录 （kepelr）
+├── myDataT20 # 提前构建好的数据集存放目录 （tess）
 ```
 
 
 
-# Reproduction
-The corresponding reproduction commands are as follows:
+# 复现
+
+对应的复现指令如下：
 
 ```
-# (It is recommended to prepend the command with CUDA_VISIBLE_DEVICES=TODO to specify the GPU(s) to use; if omitted, all available GPUs will be used.)# Kepler：
-# gpt2 
+# 以下是全部改进点开启后的复现指令：（建议在指令前加上：CUDA_VISIBLE_DEVICES=TODO, 来指明所用的GPU，若不加，代表使用所有可用的GPU）
+# Kepler数据上：
+# gpt2 模型
 python main.py --model_type gpt2 --use_lora --exp_num 1  --all --dataset kepler
 
-# bert
+# bert模型
 python main.py --model_type bert --use_lora --exp_num 1  --all --dataset kepler
 
-# roberta
+# roberta模型
 python main.py --model_type roberta-c --use_lora --exp_num 1  --all --dataset kepler
 
-# deberta
+# deberta模型
 python main.py --model_type deberta --use_lora --exp_num 1  --all --dataset kepler
 
-# FLARE
+# 尝试复现的FLARE
 python main_flare.py --dataset kepler
 
 
-# TESS :
-# gpt2 
+# TESS 数据上：
+# gpt2 模型
 python main.py --model_type gpt2 --use_lora --exp_num 1  --all --dataset tess
 
-# bert
+# bert模型
 python main.py --model_type bert --use_lora --exp_num 1  --all --dataset tess
 
-# roberta
+# roberta模型
 python main.py --model_type roberta-c --use_lora --exp_num 1  --all --dataset tess
 
-# deberta
+# deberta模型
 python main.py --model_type deberta --use_lora --exp_num 1  --all --dataset tess
 
-# FLARE
+# 尝试复现的FLARE
 python main_flare.py --dataset tess
 ```
 
 
 
-Ablation study, used to evaluate the impact of each module on the experimental results.
+消融实验，用来判定各个模块对实验的影响
 
 ```
-# kepler
-# off --on_mm_history
+# kepler数据
+# 关闭--on_mm_history
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics  --dataset kepler
 
-# off --on_mm_statistics
+# --on_mm_statistics
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance  --on_mm_history --dataset kepler
 
-# off  --on_enhance
+# 关闭--on_enhance
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 
-# off --on_phy_loss
+# 关闭--on_phy_loss
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 ```
 
 
 
-To reproduce `gpt4ts`, you need to run the following commands:
+复现`gpt4ts`，需要执行如下指令:
 
 ```
-# with all:
+# 改进点加入后(all):
 python main.py --model_type gpt4ts --exp_num 1 --all
 
-# base:
+# 改进点未加入之前（base）:
 python main.py --model_type gpt4ts --exp_num 1
 ```
 
 
 
-In this way, you can successfully reproduce almost all the experiments mentioned in the paper.
+如此你可以成功复现论文中提到的几乎全部实验。
 

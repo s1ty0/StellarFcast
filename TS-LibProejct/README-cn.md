@@ -1,26 +1,29 @@
-# Virtual Environment Configuration
+# 虚拟环境的配置
 
-Simply configure the environment according to `requirements.txt` (we recommend using conda commands to create a new virtual environment, which makes it easier to distinguish from the virtual environment used in LLMProject).
+按照`requirements.txt`配置即可(推荐用conda的指令新建虚拟环境，方便同`LLMProject`的虚拟环境作区分)
 
 ```
 pip install -r requirements.txt
 ```
 
-I must remind you that if you encounter unexpected errors while installing dependencies, I recommend asking a large language model for assistance. All required packages for the experiment have been listed, so unexpected errors should not occur.
+我不得不提醒你的是，如果在安装依赖的时候碰到了一些意外的错误，我推荐你询问大模型寻求帮助，实验所需的所有包已经列出，应该不会出现意外的错误。
 
 
-# Reproduction
 
-Ensure that the following folders exist in the current directory:
+# 复现
+
+确保当下目录存在以下文件夹：
 
 ```
-├── myDataK20 # （kepler）
-├── myDataT20 # （tess）
+├── myDataK20 # 提前构建好的数据集存放目录（kepler）
+├── myDataT20 # 提前构建好的数据集存放目录（tess）
 ```
 
-The corresponding reproduction commands (note: the number appended after the script specifies the `CUDA GPU` device index):
+
+对应的复现指令（注：脚本后面携带的数字，代表指定的`cuda gpu`序号）：
+
 ```
-# base
+# 基础运行
 sh ./scripts/classification/DLinear.sh 1 
 sh ./scripts/classification/PatchTST.sh 4
 sh ./scripts/classification/iTransformer.sh 2
@@ -30,7 +33,7 @@ sh ./scripts/classification/Autoformer.sh 4
 sh ./scripts/classification/iTransformer.sh 4
 sh ./scripts/classification/MICN.sh 4
 
-# with all updates
+# 改进开启后运行：
 sh ./scripts/classification/DLinear.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 sh ./scripts/classification/PatchTST.sh 4 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 sh ./scripts/classification/iTransformer.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
@@ -41,12 +44,13 @@ sh ./scripts/classification/iTransformer.sh 1 --on_phy_loss --on_enhance --on_mm
 sh ./scripts/classification/MICN.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 ```
 
-Note: The above reproduction is intended for the Kepler data. If you wish to reproduce results using the TESS data instead, simply locate the corresponding scripts and modify them as follows.
+注：以上的复现针对Kepler数据而言，如果想复现对应的TESS数据，只需要找到对应的脚本，按如下修改即可。
+
 ```
-example：
-# Autoformer.sh：
+比如：
+# Autoformer.sh中：
   --root_path ./myDataK20 \
-change to：
+改为：
   --root_path ./myDataT20 \
 ```
 
