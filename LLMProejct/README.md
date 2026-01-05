@@ -40,7 +40,7 @@ deberta-v3-base # https://huggingface.co/microsoft/deberta-v3-base
 对应的复现指令如下：
 
 ```
-# # 以下是全部改进点开启后的复现指令：（建议在指令前加上：CUDA_VISIBLE_DEVICES=TODO, 来指明所用的GPU，若不加，代表使用所有可用的GPU）
+# 以下是全部改进点开启后的复现指令：（建议在指令前加上：CUDA_VISIBLE_DEVICES=TODO, 来指明所用的GPU，若不加，代表使用所有可用的GPU）
 # Kepler数据上：
 # gpt2 模型
 python main.py --model_type gpt2 --use_lora --exp_num 1  --all --dataset kepler
@@ -93,6 +93,7 @@ CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_nu
 # 关闭--on_phy_loss
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 ```
+
 
 
 复现`gpt4ts`，需要执行如下指令:

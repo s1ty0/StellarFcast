@@ -1,5 +1,7 @@
 # 1. 硬件信息
-我们的所有实验，在单卡NVIDIA A100 Tensor Core GPU运行成功。
+我们的所有实验，在单卡`NVIDIA A100 Tensor Core GPU`运行。
+
+
 
 # 1. 虚拟环境的配置
 
