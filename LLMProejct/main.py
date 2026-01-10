@@ -33,7 +33,6 @@ except ImportError:
     SentenceTransformer = None
 
 # 引入物理损失函数：
-from phy_loss import PhysicsRegularizedLoss # 此处的phy_loss即是用了第二版本的v2_loss
 
 # gpt4ts需要用到：
 from gpt4ts_modules import Gpt4tsLightningModule
@@ -48,6 +47,63 @@ MODEL_PATH_MAP = {
     "deberta": "./models/deberta-v3-base",  # ← 新增 DeBERTa 路径
     "roberta-c": "./models/chinese-roberta-wwm-ext",
 }
+
+class PhysicsRegularizedLoss(nn.Module):
+    def __init__(self, lambda_phys=0.1, conf_threshold = 0.5, use_data="kepler"): # todo 这里的rise_threshold值，有两个选择，分别是[kepler: 0.0175 和 tess： 0.0132]
+        super().__init__()
+        rise_threshold = [0.0175,0.0132]
+
+        self.ce_loss = nn.CrossEntropyLoss()
+        self.lambda_phys = lambda_phys
+        self.conf_threshold = conf_threshold  # ← 新增参数, 可调的置信度阈值, 默认平衡点，为了稳定物理正则化约束
+
+        if use_data == "kepler":
+            self.rise_threshold = rise_threshold[0]
+        if use_data == "tess":
+            self.rise_threshold = rise_threshold[1]
+
+    def forward(self, logits, targets, input_lc):
+        # 原始分类损失
+        ce = self.ce_loss(logits, targets)
+
+        # 物理约束损失：仅对真实耀斑（label=1）的样本进行计算
+        flare_mask = (targets == 1).float() # [B] 返回值是一个布尔数组吗？
+        if flare_mask.sum() == 0:
+            phys_loss = torch.tensor(0.0, device=logits.device)
+        else:
+            phys_loss = self.flare_shape_penalty_on_true_flare(input_lc, flare_mask)
+
+        return ce + self.lambda_phys * phys_loss
+
+    def flare_shape_penalty_on_true_flare(self, input_lc, flare_mask):
+        diff = input_lc[:, 1:] - input_lc[:, :-1]  # [B, L-1]
+
+        max_rise = torch.max(diff, dim=1).values  # [B]# 对真实耀斑：若 max_rise < threshold， 则惩罚
+        penalty = torch.relu(self.rise_threshold - max_rise)  # [B]#只对真实耀斑样本计算损失
+        weighted_penalty = penalty * flare_mask
+
+        return weighted_penalty.sum() / (flare_mask.sum() + 1e-8)
+
+
+    def flare_shape_penalty(self, input_lc, pred_probs):
+        """
+        lc: [B, L] 原始光变曲线
+        pred_prob: [B] 模型预测为耀斑的概率
+        返回：违反耀斑形状先验的惩罚
+        """
+        # 计算一阶导数（近似上升/下降速率）
+        diff = input_lc[:, 1:] - input_lc[:, :-1]  # [B, L-1]
+
+        # 耀斑应有显著上升段
+        max_rise = torch.max(diff, dim=1).values  # [B]
+
+        # 若预测是耀斑但无显著上升，则惩罚
+        penalty = torch.relu(self.rise_threshold - max_rise)
+
+        # 加权: 只惩罚高置信度预测（pred_prob > 0.5）# pred_prob 参数可调
+        weight = torch.clamp(pred_probs - self.conf_threshold, min=0.0)
+
+        return ((penalty * weight).mean() * weight).mean()
 
 def collate_fn(data):
         """
@@ -450,7 +506,7 @@ class MyTransformerModel(nn.Module):
 
 # 封装为Lightning模型
 class MyTransformerLightningModule(LightningModule):
-    def __init__(self, num_classes=2, input_dim=1, model_type="bert", use_lora=False, lr=1e-4, on_phy_loss=False, text_emb_dim=768, use_multimodal=False): # 【val_dynamic_threshold】经过实验，效果一般，暂时不考虑
+    def __init__(self, num_classes=2, input_dim=1, model_type="bert", use_lora=False, lr=1e-4, on_phy_loss=False, text_emb_dim=768, use_multimodal=False, use_data="kepler"): # 【val_dynamic_threshold】经过实验，效果一般，暂时不考虑
         super().__init__()
         self.save_hyperparameters() # 自动保存所有参数，包括use_lora
         self.model_type=model_type
@@ -472,7 +528,7 @@ class MyTransformerLightningModule(LightningModule):
         self.on_phy_loss = on_phy_loss
         self.criterion = nn.CrossEntropyLoss()
         if self.on_phy_loss:
-            self.criterion = PhysicsRegularizedLoss()
+            self.criterion = PhysicsRegularizedLoss(use_data=use_data)
 
 
         self.validation_outputs = []
@@ -816,6 +872,8 @@ def main(args):
             lr=args.lr,
             text_emb_dim=args.text_emb_dim,
             use_multimodal=args.use_multimodal,
+            use_data=args.dataset,
+            on_phy_loss=args.on_phy_loss
             # on_val_dynamic_threshold=args.on_val_dynamic_threshold # 【val_dynamic_threshold】经过实验，效果一般，暂时不考虑
         )
         if args.model_type == 'deberta':
