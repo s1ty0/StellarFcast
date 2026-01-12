@@ -166,15 +166,15 @@ class MyTransformerModel(nn.Module):
 # ----------------------------
 def main():
     parser = argparse.ArgumentParser(description='Stellar Forecasting with LLM and LoRA using PyTorch Lightning')
-    parser.add_argument('--root_path', type=str, default='./myDataK', help='Path to my data')
+    parser.add_argument('--root_path', type=str, default='./myDataK20', help='Path to my data')
     parser.add_argument('--dataset', type=str, default="kepler", help='dataset we use.')
 
     args = parser.parse_args()
 
     if args.dataset == "kepler":
-        args.root_path = "./myDataK"
+        args.root_path = "./myDataK20"
     elif args.dataset == "tess":
-        args.root_path = "./myDataT"
+        args.root_path = "./myDataT20"
     else:
         raise ValueError(f"Unsupported dataset: {args.dataset}")
 
@@ -183,12 +183,12 @@ def main():
 
     # === 替换为你的真实数据加载逻辑 ===
     # 例如：
-    X_train = np.load(f"{args.dataset}/train/lc_data.npy")  # (N_train, L)
-    y_train = np.load(f"{args.dataset}/train/label_data.npy")
-    X_val = np.load(f"{args.dataset}/val/lc_data.npy")
-    y_val = np.load(f"{args.dataset}/val/label_data.npy")
-    X_test = np.load(f"{args.dataset}/test/lc_data.npy")
-    y_test = np.load(f"{args.dataset}/test/label_data.npy")
+    X_train = np.load(f"{args.root_path}/train/lc_data.npy")  # (N_train, L)
+    y_train = np.load(f"{args.root_path}/train/label_data.npy")
+    X_val = np.load(f"{args.root_path}/val/lc_data.npy")
+    y_val = np.load(f"{args.root_path}/val/label_data.npy")
+    X_test = np.load(f"{args.root_path}/test/lc_data.npy")
+    y_test = np.load(f"{args.root_path}/test/label_data.npy")
 
     # 模拟数据仅用于演示
     # N_train, N_val, N_test, L = 20, 5, 5, 512
