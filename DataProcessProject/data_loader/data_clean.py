@@ -65,7 +65,7 @@ def main():
     if args.dataset == "kepler":
         output_root = "../myDataK"  # 新目录名，避免混淆
     elif args.dataset == "tess":
-        output_root = "../myDataH"  # 新目录名，避免混淆
+        output_root = "../myDataT"  # 新目录名，避免混淆
     else:
         raise ValueError("Unsupported dataset. Choose 'kepler' or 'tess'.")
 
