@@ -3,13 +3,13 @@
 The following dependencies need to be installed:
 
 ```
+torch==1.13.1
+transformers==4.30.2
+numpy==1.21.6
+tqdm==4.65.0
+pyarrow
 pandas
 scikit-learn
-pyarrow
-numpy
-torch
-transformers
-tqdm
 ```
 
 Note: I do not recommend creating a new virtual environment. Most base Python environments should already satisfy these requirements.
@@ -79,10 +79,18 @@ This will generate:
 ```
 
 To support experimental improvements, we need to build embeddings for history and statistics.
-First, download the text encoder`bert`,
+First, download the text encoder`bert`, which is available on Hugging Face.
+Download link: `https://huggingface.co/google-bert/bert-base-uncased`
 
+Alternatively, you can use our provided download script:
 ```
 python encoderDown.py
+```
+
+After downloading, you will obtain the following directory structure:
+```
+├── textEncoder
+│   ├── bert_base_uncased
 ```
 
 Then run the following scripts to generate embeddings:

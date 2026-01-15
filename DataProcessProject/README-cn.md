@@ -84,10 +84,16 @@ python createT20.py
 
 等等！先别急，我们进行实验所必需的，一些改进点的引入，仍需要构建history和statistics的嵌入
 
-首先下载实验所使用的文本编码器：`bert`,
-
+首先下载实验所使用的文本编码器：`bert`, 可在hugging face上下载，这是下载链接：`https://huggingface.co/google-bert/bert-base-uncased`
+也可以使用我们提供的下载脚本：
 ```
 python encoderDown.py
+```
+
+下载完后，将会得到如下文件夹：
+```
+├── textEncoder
+│   ├── bert_base_uncased
 ```
 
 然后，执行如下脚本，得到history和statistics的嵌入：
