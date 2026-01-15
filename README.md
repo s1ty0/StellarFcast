@@ -6,8 +6,12 @@ All experiments were conducted on a single `NVIDIA A100 Tensor Core GPU` device.
 
 We configured two virtual environments based on the execution requirements:
 - One for reproducing the time-series foundation models (see: `TS-LibProejct folder`, note that Python 3.8 is required here).
+
 - One for reproducing the time-series large models (see: `LLMProject folder`, note that Python 3.10 is required here).
-We recommend using `conda` to manage virtual environments, as it simplifies the process significantly. For details on `conda` usage, please refer to official documentation or search online.
+
+  The specific `requirements.txt` can be found in the corresponding subfolder.
+
+  We recommend using `conda` to manage virtual environments, as it simplifies the process significantly. For details on `conda` usage, please refer to official documentation or search online.
 
 
 # 3. Data Preparation
