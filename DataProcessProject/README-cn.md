@@ -1,21 +1,10 @@
 # 1. 配置环境
 
-需要安装以下依赖：
+按照`requirements.txt`配置即可(推荐用conda的指令新建虚拟环境)
 
 ```
-pandas
-scikit-learn
-pyarrow
-numpy
-torch
-transformers
-tqdm
+pip install -r requirements.txt
 ```
-
-但是，我不推荐你新建一个虚拟环境，在绝大数基础的python环境（base）里，应该都满足上述条件。
-
-若不满足，安装其中缺失的包即可。也可以构建一个虚拟环境，用来专门做数据处理。
-
 
 
 # 2. 获取数据

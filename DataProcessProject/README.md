@@ -1,19 +1,9 @@
 # 1. Configure Environment
 
-The following dependencies need to be installed:
-
+Simply configure the environment according to `requirements.txt` (we recommend using conda commands to create a new virtual environment to easily distinguish it from the `TS-LibProject` virtual environment).
 ```
-torch==1.13.1
-transformers==4.30.2
-numpy==1.21.6
-tqdm==4.65.0
-pyarrow
-pandas
-scikit-learn
+pip install -r requirements.txt
 ```
-
-Note: I do not recommend creating a new virtual environment. Most base Python environments should already satisfy these requirements.
-If not, install the missing packages. Alternatively, you may create a dedicated virtual environment for data processing.
 
 
 

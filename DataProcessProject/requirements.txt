@@ -1,0 +1,9 @@
+torch==1.13.1
+transformers==4.30.2
+numpy==1.21.6
+tqdm==4.65.0
+pyarrow
+pandas
+scikit-learn
+imageio>=2.27
+pillow>=9.0.1
