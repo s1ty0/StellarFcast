@@ -1077,6 +1077,9 @@ if __name__ == "__main__":
     elif args.on_mm_statistics or args.on_mm_history or args.on_enhance :
         args.input_dim = 2
 
+    if args.model_type == 'deberta':
+        args.batch_size = 32
+
     # 根据所选的模型，自动设置其输入维度
     ENCODER_DIM_MAP = {
         "minLM": 384,
