@@ -84,14 +84,14 @@ python main_flare.py --dataset tess
 # 关闭--on_mm_history
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics  --dataset kepler
 
-# --on_mm_statistics
+# 关闭 --on_mm_statistics
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance  --on_mm_history --dataset kepler
 
 # 关闭--on_enhance
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_mm_statistics --on_mm_history --dataset kepler
 
 # 关闭--on_phy_loss
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 ```
 
 

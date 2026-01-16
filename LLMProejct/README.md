@@ -81,11 +81,11 @@ CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_nu
 # off --on_mm_statistics
 CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance  --on_mm_history --dataset kepler
 
-# off  --on_enhance
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+# off --on_enhance
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_mm_statistics --on_mm_history --dataset kepler
 
-# off --on_phy_loss
-CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
+# off -on_phy_loss
+CUDA_VISIBLE_DEVICES=4 python main.py --model_type roberta-c --use_lora --exp_num 1 --on_enhance --on_mm_statistics --on_mm_history --dataset kepler
 ```
 
 
