@@ -30,7 +30,6 @@ sh ./scripts/classification/iTransformer.sh 2
 sh ./scripts/classification/TimesNet.sh 5
 sh ./scripts/classification/Informer.sh 3
 sh ./scripts/classification/Autoformer.sh 4
-sh ./scripts/classification/iTransformer.sh 4
 sh ./scripts/classification/MICN.sh 4
 
 # 改进开启后运行：
@@ -40,7 +39,6 @@ sh ./scripts/classification/iTransformer.sh 1 --on_phy_loss --on_enhance --on_mm
 sh ./scripts/classification/TimesNet.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 sh ./scripts/classification/Informer.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 sh ./scripts/classification/Autoformer.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
-sh ./scripts/classification/iTransformer.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 sh ./scripts/classification/MICN.sh 1 --on_phy_loss --on_enhance --on_mm_statistics --on_mm_history
 ```
 
