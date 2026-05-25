@@ -1,27 +1,27 @@
 # 1. Hardware Information
-All experiments were conducted on a single `NVIDIA A100 Tensor Core GPU` device.
 
+All experiments are conducted on a single `NVIDIA A100 Tensor Core GPU`.
 
-# 2. Virtual Environment Configuration
+# 2. Data Preparation
 
-We configured two virtual environments based on the execution requirements:
-- One for reproducing the time-series foundation models (see: `TS-LibProejct folder`, note that Python 3.8 is required here).
+The code and instructions for data preprocessing are located in the `DataProcessProject` folder. Please read the `README` file in that folder and follow the steps to complete the preprocessing. Do not proceed to the next step until the data preparation is successfully verified.
 
-- One for reproducing the time-series large models (see: `LLMProject folder`, note that Python 3.10 is required here).
+# 3. Virtual Environment Setup
 
-  The specific `requirements.txt` can be found in the corresponding subfolder.
+We provide two virtual environment configurations to accommodate different experimental requirements:
 
-  We recommend using `conda` to manage virtual environments, as it simplifies the process significantly. For details on `conda` usage, please refer to official documentation or search online.
+- **Time-series Foundation Models**: See the `TS-LibProject` folder. **Python 3.8 is required**.
+- **Time-series Large Models**: See the `LLMProject` folder. **Python 3.10 is required**.
 
+The specific dependency information (`requirements.txt`) can be found in each corresponding subfolder.
 
-# 3. Data Preparation
+We recommend using `conda` for virtual environment management, as it greatly simplifies the setup process. Please refer to external documentation for detailed instructions on how to use `conda`.
 
-Refer to the `DataProcessProject` folder for data preparation. Read its `README file` and follow the experimental steps. Proceed to the next step (reproduction) only after successfully completing the experiment.
+# 4. Reproduction Guide
 
+The model reproduction is divided into two main parts:
 
-# 4. Model Reproduction
+- **Part 1: Time-series Foundation Models** (see the `TS-LibProject` folder)
+- **Part 2: Time-series Large Models** (see the `LLMProject` folder)
 
-The main model reproduction is divided into two parts:
-Part 1: Reproduction of time-series foundation models (`TS-LibProejct folder`)
-Part 2: Reproduction of time-series large models (`LLMProject folder`)
-Detailed reproduction instructions are available in the README.md file within each corresponding folder.
+Detailed reproduction steps for each part can be found in the `README.md` file within the corresponding folder.
