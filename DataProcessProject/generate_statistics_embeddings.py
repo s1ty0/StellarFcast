@@ -101,5 +101,38 @@ def main():
     np.save(output_path, final_embeddings)
     print(f"Saved to {output_path}")
 
+    # 保存原始统计量数值（用于 ablation baseline）
+    stats_output_path = os.path.join(data_dir, "raw_statistics.npy")
+    raw_stats = np.stack([count_ones_list, flux_medians], axis=1)  # (N, 2)
+    np.save(stats_output_path, raw_stats.astype(np.float32))
+    print(f"Saved raw statistics to {stats_output_path}")
+    # 在 generate_statistics_embeddings.py 的 main() 函数末尾
+
+    # === 1. 保存原始统计量（全量数据）===
+    raw_stats = np.stack([count_ones_list, flux_medians], axis=1)  # (N, 2)
+
+    # 可选：是否归一化（MinMax 到 0~1）
+    # if args.normalize_stats:
+    # 直接归一化，不保存任何参数
+    for col in range(raw_stats.shape[1]):
+        min_val = np.min(raw_stats[:, col])
+        max_val = np.max(raw_stats[:, col])
+        if max_val - min_val > 1e-8:
+            raw_stats[:, col] = (raw_stats[:, col] - min_val) / (max_val - min_val)
+        else:
+            raw_stats[:, col] = 0.5
+    
+    print(f"📊 Normalized with MinMax (0~1)")
+
+    stats_path = os.path.join(data_dir, "raw_statistics.npy")
+    np.save(stats_path, raw_stats.astype(np.float32))
+
+    # 打印信息
+    print(f"✅ Raw statistics saved: {stats_path}")
+    print(f"   shape: {raw_stats.shape}")
+    print(f"   range: [{raw_stats.min():.4f}, {raw_stats.max():.4f}]")
+    print(f"   First 5 samples:\n{raw_stats[:5]}")
+
+
 if __name__ == "__main__":
     main()
