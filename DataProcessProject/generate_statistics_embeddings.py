@@ -133,6 +133,5 @@ def main():
     print(f"   range: [{raw_stats.min():.4f}, {raw_stats.max():.4f}]")
     print(f"   First 5 samples:\n{raw_stats[:5]}")
 
-
 if __name__ == "__main__":
     main()

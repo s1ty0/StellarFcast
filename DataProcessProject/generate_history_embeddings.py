@@ -112,8 +112,8 @@ def main():
     # else:
     # 加载 BERT 模型
     encoder_path_map = {
-        # "bert-chinese": "./textEncoder/bert-base-chinese",
-        "bert-chinese": "./textEncoder/bert_base_uncased/",
+        "bert-chinese": "./textEncoder/bert-base-chinese",
+        # "bert-chinese": "./textEncoder/bert_base_uncased/",
     }
 
     model_path = encoder_path_map[args.encoder]

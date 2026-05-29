@@ -5,6 +5,10 @@ Simply configure the environment according to `requirements.txt` (we recommend u
 pip install -r requirements.txt
 ```
 
+For GPU support, please specify the installation source according to your CUDA version:
+```
+# CUDA 12.1: pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu121
+```
 
 
 # 2. Obtain Data
